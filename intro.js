@@ -70,6 +70,55 @@
   }
 
   /**
+   * Speech Synthesis API
+   */
+   function Speech( text ){
+
+      this.text   = text;
+      this.voices = [];
+
+      this.loadVoices = function loadVoices(){
+
+        var _voices = speechSynthesis.getVoices();
+            _voices.forEach(function(voice, i) {
+               this.voices.push( _voice.name + ":" + _voice.name );
+        });
+
+      };
+
+      // window.speechSynthesis.onvoiceschanged = function(e) {
+      //   loadVoices();
+      // };
+
+      this.cancel = function cancel(){
+
+        if ( 'speechSynthesis' in window ) { window.speechSynthesis.cancel(); }
+
+      };
+
+      this.speak = function speak(){
+
+        if ('speechSynthesis' in window) {
+          var msg        = new SpeechSynthesisUtterance();
+              msg.text   = this.text;
+              msg.volume = 1;     // 0 to 1
+              msg.rate   = 0.5;   // 0.1 to 10
+              msg.pitch  = 1;     // 0 to 2
+           // msg.lang = 'en-US';
+           // msg.voiceURI = 'native';
+           // msg.voice = speechSynthesis.getVoices()
+              window.speechSynthesis.speak( msg );
+              return;
+        } else {
+            throw "Error";
+        }
+
+
+      }
+    
+   }
+
+  /**
    * Initiate a new introduction/guide from an element in the page
    *
    * @api private
@@ -424,7 +473,7 @@
    * @param {HTMLElement} arrowLayer
    * @param {HTMLElement} helperNumberLayer
    */
-  function _placeTooltip(targetElement, tooltipLayer, arrowLayer, helperNumberLayer) {
+  function _placeTooltip(targetElement, tooltipLayer, arrowLayer, helperNumberLayer) {  
     var tooltipCssClass = '',
         currentStepObj,
         tooltipOffset,
@@ -712,7 +761,7 @@
    * @method _showElement
    * @param {Object} targetElement
    */
-  function _showElement(targetElement) {
+  function _showElement(targetElement) { 
 
     if (typeof (this._introChangeCallback) !== 'undefined') {
       this._introChangeCallback.call(this, targetElement.element);
@@ -877,10 +926,13 @@
         buttonsLayer.style.display = 'none';
       }
 
+
       tooltipLayer.className = 'introjs-tooltip';
       tooltipLayer.appendChild(tooltipTextLayer);
       tooltipLayer.appendChild(bulletsLayer);
       tooltipLayer.appendChild(progressLayer);
+
+
 
       //add helper layer number
       if (this._options.showStepNumbers == true) {
@@ -1021,6 +1073,11 @@
     if (typeof (this._introAfterChangeCallback) !== 'undefined') {
       this._introAfterChangeCallback.call(this, targetElement.element);
     }
+
+    // ADDING SPEECH SYNTHESIS
+    var speech = new Speech( targetElement.intro );
+        speech.speak();
+
   }
 
   /**
